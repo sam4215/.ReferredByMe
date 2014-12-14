@@ -7,9 +7,10 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import org.spongepowered.api.util.command.CommandCallable;
 import uk.co.abyxstudioz.referredbyme.ReferredByMe;
 
-public class Refer implements CommandExecutor {
+public class Refer implements CommandCallable {
     private ReferredByMe referredByMe;
 
     public Refer(ReferredByMe mainPlugin) {

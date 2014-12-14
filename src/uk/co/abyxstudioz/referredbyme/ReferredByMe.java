@@ -1,30 +1,29 @@
 package uk.co.abyxstudioz.referredbyme;
 
-import org.bukkit.ChatColor;
-import org.bukkit.block.Sign;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.block.SignChangeEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.plugin.java.JavaPlugin;
-
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
+import org.spongepowered.api.entity.player.Player;
+import org.spongepowered.api.event.player.PlayerInteractEvent;
+import org.spongepowered.api.event.player.PlayerJoinEvent;
+import org.spongepowered.api.event.state.ServerStartedEvent;
+import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.util.config.ConfigFile;
+import org.spongepowered.api.util.event.Subscribe;
+import org.spongepowered.api.event.player.PlayerJoinEvent;
 import uk.co.abyxstudioz.referredbyme.commands.*;
 
-public class ReferredByMe extends JavaPlugin implements Listener {
+@Plugin(name="ReferredByMe Rebooted", id="RBM-R", version = "0.0.1")
+public class ReferredByMe {
 
     private boolean update;
 
-    @Override
-    public void onEnable() {
+    @Subscribe
+    public void onEnable(ServerStartedEvent event) {
         this.saveDefaultConfig();
         getLogger().info("ReferredByMe has been enabled.");
         getLogger().info("Author: LaXynd");
         getLogger().info("Version: V0.7");
         getServer().getPluginManager().registerEvents(this, this);
-        if (getConfig().getDouble("Version") < 0.6) {
+        if (ConfigFile.getDouble("Version") < 0.6) {
             update = true;
             this.saveConfig();
         } else {
@@ -41,67 +40,67 @@ public class ReferredByMe extends JavaPlugin implements Listener {
         getCommand("referversion").setExecutor(new ReferVersion(this));
     }
 
-    @EventHandler
+    @Subscribe
     public void playerJoin(PlayerJoinEvent evt) {
         Player player = evt.getPlayer();
-        if (!getConfig().getBoolean("Players." + player.getName().toLowerCase() + ".Referred")) {
-            if (getConfig().getString("Players." + player.getName().toLowerCase() + ".IP") == null) {
-                if (!getConfig().getString("Messages.WelcomeMessage").equals("")) {
-                    String WelcomeMessage = getConfig().getString("Messages.WelcomeMessage").replace("{player}",
+        if (!ConfigFile.getBoolean("Players." + player.getName().toLowerCase() + ".Referred")) {
+            if (ConfigFile.getString("Players." + player.getName().toLowerCase() + ".IP") == null) {
+                if (!ConfigFile.getString("Messages.WelcomeMessage").equals("")) {
+                    String WelcomeMessage = ConfigFile().getString("Messages.WelcomeMessage").replace("{player}",
                             player.getName().toLowerCase());
                     player.sendMessage(ChatColor.RED + "[ReferredByMe] " + ChatColor.GREEN + WelcomeMessage);
-                    getConfig().set("Players." + player.getName().toLowerCase() + ".IP",
+                    ConfigFile.set("Players." + player.getName().toLowerCase() + ".IP",
                             player.getAddress().getAddress().getHostAddress());
                 }
                 this.saveConfig();
             }
-            if (!getConfig().getString("Messages.WhoReferred").equals("")) {
-                String WhoReferred = getConfig().getString("Messages.WhoReferred").replace("{player}",
+            if (!ConfigFile.getString("Messages.WhoReferred").equals("")) {
+                String WhoReferred = ConfigFile.getString("Messages.WhoReferred").replace("{player}",
                         player.getName().toLowerCase());
                 player.sendMessage(ChatColor.RED + "[ReferredByMe] " + ChatColor.GREEN + WhoReferred);
             }
         }
-        if (getConfig().getInt("Players." + player.getName().toLowerCase() + ".Rank") == 0) {
-            getConfig().set("Rank.Ranks", getConfig().getInt("Rank.Ranks") + 1);
-            getConfig().set("Players." + player.getName().toLowerCase() + ".Rank", getConfig().getInt("Rank.Ranks"));
-            getConfig().set("Rank." + getConfig().getInt("Rank.Ranks") + ".Name", player.getName().toLowerCase());
-            getConfig().set("Rank." + getConfig().getInt("Rank.Ranks") + ".Referrals",
-                    getConfig().getInt("Players." + player.getName().toLowerCase() + ".Referrals"));
+        if (evt.spongepowered.api.event.player.nfig().getInt("Players." + player.getName().toLowerCase() + ".Rank") == 0) {
+            ConfigFile.set("Rank.Ranks", ConfigFile().getInt("Rank.Ranks") + 1);
+            ConfigFile().set("Players." + player.getName().toLowerCase() + ".Rank", ConfigFile().getInt("Rank.Ranks"));
+            ConfigFile().set("Rank." + ConfigFile().getInt("Rank.Ranks") + ".Name", player.getName().toLowerCase());
+            ConfigFile().set("Rank." + ConfigFile().getInt("Rank.Ranks") + ".Referrals",
+                    ConfigFile().getInt("Players." + player.getName().toLowerCase() + ".Referrals"));
             this.saveConfig();
         }
-        int Rank = getConfig().getInt("Players." + player.getName().toLowerCase() + ".Rank");
+        int Rank = ConfigFile().getInt("Players." + player.getName().toLowerCase() + ".Rank");
         int Rankers = Rank - 1;
-        if (getConfig().getInt("Players." + player.getName().toLowerCase() + ".Referrals") >= ReferredByMe.this.getConfig()
+        if (ConfigFile().getInt("Players." + player.getName().toLowerCase() + ".Referrals") >= ReferredByMe.this.getConfig()
                 .getInt("Rank." + Rankers + ".Referrals") && Rankers != 0) {
-            getConfig().set("Rank." + Rank + ".Name", getConfig().getString("Rank." + Rankers + ".Name"));
-            getConfig().set("Rank." + Rank + ".Referrals", getConfig().getInt("Rank." + Rankers + ".Referrals"));
-            getConfig().set("Players." + getConfig().getString("Rank." + Rankers + ".Name") + ".Rank", Rank);
-            getConfig().set("Rank." + Rankers + ".Name", player.getName().toLowerCase());
-            getConfig().set("Rank." + Rankers + ".Referrals",
-                    getConfig().getInt("Players." + player.getName().toLowerCase() + ".Referrals"));
-            getConfig().set("Players." + player.getName().toLowerCase() + ".Rank", Rankers);
+            ConfigFile().set("Rank." + Rank + ".Name", ConfigFile().getString("Rank." + Rankers + ".Name"));
+            ConfigFile().set("Rank." + Rank + ".Referrals", ConfigFile().getInt("Rank." + Rankers + ".Referrals"));
+            ConfigFile().set("Players." + ConfigFile().getString("Rank." + Rankers + ".Name") + ".Rank", Rank);
+            ConfigFile().set("Rank." + Rankers + ".Name", player.getName().toLowerCase());
+            ConfigFile().set("Rank." + Rankers + ".Referrals",
+                    ConfigFile().getInt("Players." + player.getName().toLowerCase() + ".Referrals"));
+            ConfigFile().set("Players." + player.getName().toLowerCase() + ".Rank", Rankers);
             this.saveConfig();
         }
-        if (!getConfig().getString("Messages.ReferElse").equals("")) {
-            String ReferElse = getConfig().getString("Messages.ReferElse").replace("{player}", player.getName().toLowerCase());
+        if (!ConfigFile().getString("Messages.ReferElse").equals("")) {
+            String ReferElse = ConfigFile().getString("Messages.ReferElse").replace("{player}", player.getName().toLowerCase());
             player.sendMessage(ChatColor.RED + "[ReferredByMe] " + ChatColor.GREEN + ReferElse);
         }
         if (update && player.isOp()) {
             player.sendMessage(ChatColor.RED + "[ReferredByMe] " + ChatColor.DARK_RED + "You are using Config Version "
-                    + ChatColor.RED + getConfig().getDouble("Version") + ChatColor.DARK_RED + " with ReferredByMe Version "
+                    + ChatColor.RED + ConfigFile().getDouble("Version") + ChatColor.DARK_RED + " with ReferredByMe Version "
                     + ChatColor.RED + "0.7" + ChatColor.DARK_RED + ". Please update your config to follow " + ChatColor.WHITE
                     + "http://dev.bukkit.org/bukkit-plugins/referredbyme/pages/example-config/");
         }
-        for (int i = 0; i < getConfig().getInt("Rewards.Tiers"); i++) {
+        for (int i = 0; i < ConfigFile.getString("Rewards.Tiers").toInt; i++) {
             int j = i + 1;
-            if (getConfig().getBoolean("Players." + player.getName().toLowerCase() + ".Claimable." + j)) {
+            if (ConfigFile().getBoolean("Players." + player.getName().toLowerCase() + ".Claimable." + j)) {
                 player.sendMessage(ChatColor.RED + "[ReferredByMe] " + ChatColor.GREEN
-                        + getConfig().getString("Messages.Claimable"));
+                        + ConfigFile().getString("Messages.Claimable"));
                 break;
             }
         }
-        if (getConfig().getInt("Players." + player.getName().toLowerCase() + ".Claimable.RCount") != 0) {
-            player.sendMessage(ChatColor.RED + "[ReferredByMe] " + ChatColor.GREEN + getConfig().getString("Messages.Claimable"));
+        if (ConfigFile().getInt("Players." + player.getName().toLowerCase() + ".Claimable.RCount") != 0) {
+            player.sendMessage(ChatColor.RED + "[ReferredByMe] " + ChatColor.GREEN + ConfigFile().getString("Messages.Claimable"));
         }
     }
 
