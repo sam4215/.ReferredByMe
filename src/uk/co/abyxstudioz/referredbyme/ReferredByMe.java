@@ -1,43 +1,39 @@
 package uk.co.abyxstudioz.referredbyme;
 
 import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
+import org.spongepowered.api.entity.EntityInteractionType;
 import org.spongepowered.api.entity.player.Player;
+import org.spongepowered.api.event.block.BlockUpdateEvent;
 import org.spongepowered.api.event.player.PlayerInteractEvent;
 import org.spongepowered.api.event.player.PlayerJoinEvent;
 import org.spongepowered.api.event.state.ServerStartedEvent;
+import org.spongepowered.api.event.state.ServerStoppingEvent;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.util.config.ConfigFile;
 import org.spongepowered.api.util.event.Subscribe;
 import org.spongepowered.api.event.player.PlayerJoinEvent;
 import uk.co.abyxstudioz.referredbyme.commands.*;
 
+import java.util.logging.Logger;
+
 @Plugin(name="ReferredByMe Rebooted", id="RBM-R", version = "0.0.1")
 public class ReferredByMe {
 
     private boolean update;
+    Logger logger = Logger.getLogger("Minecraft");
 
     @Subscribe
     public void onEnable(ServerStartedEvent event) {
         this.saveDefaultConfig();
-        getLogger().info("ReferredByMe has been enabled.");
-        getLogger().info("Author: LaXynd");
-        getLogger().info("Version: V0.7");
-        getServer().getPluginManager().registerEvents(this, this);
-        if (ConfigFile.getDouble("Version") < 0.6) {
-            update = true;
-            this.saveConfig();
-        } else {
-            update = false;
-            getConfig().set("Version", 0.7);
-            this.saveConfig();
-        }
-        getCommand("refer").setExecutor(new Refer(this));
-        getCommand("referclaim").setExecutor(new ReferClaim(this));
-        getCommand("referconfig").setExecutor(new ReferConfig(this));
-        getCommand("referinfo").setExecutor(new ReferInfo(this));
-        getCommand("referleader").setExecutor(new ReferLeader(this));
-        getCommand("referreload").setExecutor(new ReferReload(this));
-        getCommand("referversion").setExecutor(new ReferVersion(this));
+        logger.info("ReferredByMe Rebooted has been enabled.");
+        logger.info("Author: Samuel Bird (AKA ButterDev or sam4215)");
+        logger.info("Version: 0.0.1");
+    }
+    @Subscribe
+    public void onDisable(ServerStoppingEvent event)
+    {
+
     }
 
     @Subscribe
@@ -68,12 +64,12 @@ public class ReferredByMe {
                     ConfigFile().getInt("Players." + player.getName().toLowerCase() + ".Referrals"));
             this.saveConfig();
         }
-        int Rank = ConfigFile().getInt("Players." + player.getName().toLowerCase() + ".Rank");
+        int Rank = ConfigFile.getInt("Players." + player.getName().toLowerCase() + ".Rank");
         int Rankers = Rank - 1;
-        if (ConfigFile().getInt("Players." + player.getName().toLowerCase() + ".Referrals") >= ReferredByMe.this.getConfig()
+        if (ConfigFile.getInt("Players." + player.getName().toLowerCase() + ".Referrals") >= ReferredByMe.this.getConfig()
                 .getInt("Rank." + Rankers + ".Referrals") && Rankers != 0) {
-            ConfigFile().set("Rank." + Rank + ".Name", ConfigFile().getString("Rank." + Rankers + ".Name"));
-            ConfigFile().set("Rank." + Rank + ".Referrals", ConfigFile().getInt("Rank." + Rankers + ".Referrals"));
+            ConfigFile.set("Rank." + Rank + ".Name", ConfigFile().getString("Rank." + Rankers + ".Name"));
+            ConfigFile.set("Rank." + Rank + ".Referrals", ConfigFile().getInt("Rank." + Rankers + ".Referrals"));
             ConfigFile().set("Players." + ConfigFile().getString("Rank." + Rankers + ".Name") + ".Rank", Rank);
             ConfigFile().set("Rank." + Rankers + ".Name", player.getName().toLowerCase());
             ConfigFile().set("Rank." + Rankers + ".Referrals",
@@ -104,20 +100,21 @@ public class ReferredByMe {
         }
     }
 
-    @EventHandler
-    public void onSignChange(SignChangeEvent event) {
+    @Subscribe
+    public void onSignChange(BlockUpdateEvent event) {
+        if(event.getBlock().equals(ItemTypes.SIGN)) {
         if (event.getLine(0).equalsIgnoreCase("[referrank]")) {
             event.setLine(0, "§1[referrank]");
             event.setLine(2, "§4" + getConfig().getString("Rank." + event.getLine(1) + ".Name"));
             event.setLine(3, "§4" + getConfig().getString("Rank." + event.getLine(1) + ".Referrals"));
             event.setLine(1, "§2" + event.getLine(1));
         }
-    }
+    }}
 
-    @EventHandler
+    @Subscribe
     public void onPlayerInteract(PlayerInteractEvent event) {
-        if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            if (event.getClickedBlock().getState() instanceof Sign) {
+        if (event.getInteractionType() == EntityInteractionType.RIGHT_CLICK) {
+            if(event.getBlock(ItemTypes.SIGN)) { //FIXME
                 Player player = event.getPlayer();
                 Sign sign = (Sign) event.getClickedBlock().getState();
                 String signline0 = sign.getLine(0);
